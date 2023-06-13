@@ -13,6 +13,19 @@
   <script>
     /* Write my script here... */
 
+    async function handleData() {
+      // ------ LOAD DATA ------------------------
+      const data = await d3.json('../titanic-passengers.json')
+      console.log(data)
+      // CONSTANTS
+      const margin = { top: 70, right: 10, bottom: 20, left: 70 }
+      const width = 600 - (margin.left + margin.right)
+      const height = 600 - (margin.top + margin.bottom)
+
+    }
+
+    handleData()
+
     d3.json('../titanic-passengers.json')
       .then(data => {
         const byClass = {
@@ -21,7 +34,7 @@
           children: []
         }
 
-        const classNames = Array.from(new Set(data.map(d => d.fields.pclass)))
+        const classNames = Array.from(new Set(data.map(d => d.class)))
         classNames.forEach(d => {
           const lived = data.filter(p => p.fields.survived === 'Yes')
           const died = data.filter(p => p.fields.survived === 'No')
@@ -64,18 +77,18 @@
           .join('g')
           .attr('transform', d => `translate(${d.x}, ${d.y})`)
 
-      nodes 
-        .append('circle')
-        .attr('r', d => d.r)
-        console.log(d.r)
-        .attr('fill', d => {
-        if (d.data.pclass === undefined) {
-          return colorScale(d.data.label)
-        }
-          return colorScale(d.data.pclass)
-        })
-        .attr('stroke', 'black')
-        .attr('stroke-width', '1')
+        nodes 
+          .append('circle')
+          .attr('r', d => d.r)
+          console.log(d.r)
+          .attr('fill', d => {
+          if (d.data.class === undefined) {
+            return colorScale(d.data.label)
+          }
+            return colorScale(d.data.class)
+          })
+          .attr('stroke', 'black')
+          .attr('stroke-width', '1')
 
       })
   </script>
