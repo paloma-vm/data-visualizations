@@ -115,19 +115,18 @@
       const xscale = d3.scaleBand()
         // .domain(data.map(d => d.fields[pclass]))
         // .domain([0, classNames.length])
-        .domain(Object.keys(passengerCounts))
+        // .domain(Object.keys(passengerCounts))
         //.domain([0, counts.length])
-        // .domain(counts.map(d => d.name))
+        .domain(counts.map(d => d.name))
        // .domain([0, 6])
         .range([margin.left, width + margin.left])
         .padding(0.2) // space between bars
       // y scale 
       const yscale = d3.scaleLinear()
         // .domain([0, d3.max(Object.values(passengerCounts))])
-        .domain([0, 500])
-        // .domain([0, Math.max(...counts.map(d => d.value))])
+        .domain([0, Math.max(...counts.map(d => d.value))])
         .range([height, margin.top])
-      // const colorScale = d3.scaleOrdinal(['red', 'blue'])
+      const colorScale = d3.scaleOrdinal(['red', 'blue'])
         
 
       
@@ -135,40 +134,40 @@
       // Select the SVG (root node)
       const svg = d3.select('#svg')
 
-      // svg.selectAll('rect')
-      //   .data(counts)
-      //   .enter()
-      //   .append('rect')
-      //   .attr('class', 'bar1')
-      //   // .attr('x', (d, i) => {
-      //   //   console.log(xscale(d.name))
-      //   //   return xscale(d.name)
-      //   // })
-      //   .attr('x', (d, i) => xscale(i))
-      //   .attr('y', (d, i) => yscale(d.value))
-      //   .attr('width', xscale.bandwidth())
-      //   .attr('height', d => height - yscale(d.value))
-      //   .attr('fill', (d, i) => {
-      //     console.log(colorScale(i))
-      //     return colorScale(i)
-      //   })
-      //   .attr('opacity', 0.5)
-
-      // bars group (make a group to hold the bars)
-      const classBarsGroup = svg.append('g')
-      // Make the bars
-      classBarsGroup 
-        .selectAll('rect')
-        .data(Object.entries(passengerCounts))
+      svg.selectAll('rect')
+        .data(counts)
         .enter()
         .append('rect')
-        .attr('class', 'bar2')
-        .attr('x', (d, i) => xscale(d[0]))
-        .attr('y', (d, i) => yscale(d[1]))
+        .attr('class', 'bar1')
+        .attr('x', (d, i) => {
+          console.log(xscale(d.name))
+          return xscale(d.name)
+        })
+        // .attr('x', (d, i) => xscale(i))
+        .attr('y', (d, i) => yscale(d.value))
         .attr('width', xscale.bandwidth())
-        .attr('height', d => height - yscale(d[1]))
-        .attr('fill', 'bisque')
+        .attr('height', d => height - yscale(d.value))
+        .attr('fill', (d, i) => {
+          console.log(colorScale(i))
+          return colorScale(i)
+        })
         .attr('opacity', 0.5)
+
+      // bars group (make a group to hold the bars)
+    //   const classBarsGroup = svg.append('g')
+      // Make the bars
+    //   classBarsGroup 
+    //     .selectAll('rect')
+    //     .data(Object.entries(passengerCounts))
+    //     .enter()
+    //     .append('rect')
+    //     .attr('class', 'bar2')
+    //     .attr('x', (d, i) => xscale(d[0]))
+    //     .attr('y', (d, i) => yscale(d[1]))
+    //     .attr('width', xscale.bandwidth())
+    //     .attr('height', d => height - yscale(d[1]))
+    //     .attr('fill', 'bisque')
+    //     .attr('opacity', 0.5)
 
       // const survivedGroup = svg.append('g')
       // // Make the bars
