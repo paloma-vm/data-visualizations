@@ -5,6 +5,20 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Titanic</title>
+    <style>
+      /* Put the box in the center of the page */
+      body, html {
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+    
+      #svg {
+        border: 1px solid;
+        padding: 20px;
+      }
+    </style>
 </head>
 <body>
   <svg id="svg" width="800" height="500"></svg>
@@ -59,20 +73,25 @@
         const classNames = Array.from(new Set(data.map(d => d.fields.pclass)))
         console.log(classNames)
           classNames.forEach(d => {
-            // const classes = data.filter(c => c.class === d)
-            // console.log(classes)
-            // const classPop = classes.reduce((acc, d) => d.length + acc, 0)
-            // const lived = data.filter(d => d.fields.survived === 'Yes').length
-            // const died = data.filter(d => d.fields.survived === 'No').length
-            const lived = getSurvivorCountForClass(data, d)
-            const died = getCasualtyCountForClass(data, d)
-            const numPass = lived + died
+
+            const numLived = getSurvivorCountForClass(data, d)
+            const attempt = data.filter(p => p.fields.survived === 'Yes')
+            console.log(attempt)
+            const lived = data.filter(p => p.fields.survived === 'Yes' && p.fields.pclass === d)
+            console.log(lived)
+            const numDied = getCasualtyCountForClass(data, d)
+            // const died = data.filter(p => p.fields.survived === 'No')
+            const numPass = numLived + numDied
+            const classPop = lived.length
+
             byClass.children.push({
               label: 'class ' + d,
-              lived: lived,
-              died: died,
-              num_pass: lived + died, 
+              lived: numLived,
+              died: numDied,
+              num_pass: numPass, 
               population: numPass, // ***
+              //population: classPop, // ***
+
               children: []
             })
           })
@@ -97,7 +116,7 @@
         console.log(rootNode)
 
         // Number formatter
-        const num_f = d3.format(".2s")
+        // const num_f = d3.format(".2s")
 
         // Create a color scale
         const colorScale = d3
@@ -117,27 +136,29 @@
           .append('circle')
           .attr('r', d => d.r) // get the radius
           .attr('fill', d => {
-            if (d.data.country === undefined) {
+            if (d.data.pclass === undefined) {
               return colorScale(d.data.label)
             }
-            return colorScale(d.data.country)
+            return colorScale(d.data.pclass)
           })
           .attr('stroke', 'black')
           .attr('stroke-width', '1')
           // .attr('opacity', '0.5') // same opacity for all
           // to make diff opacities:
           .attr('fill-opacity', d => {
-            if (d.data.country === undefined) {
-              return 0.15 // opacity for the world and countries
+            if (d.data.pclass === undefined) {
+              return 0.15 // opacity for the total and classes
             }
-            return 0.5 // opacity for the cities
+            return 0.5 // opacity for the lived/died
           })
         
 
         // add text for population to each circle:
         nodes
           .append('text')
-          .text(d => `${num_f(d.data.population)}`)
+          // .text(d => `${num_f(d.data.population)}`)
+          .text(d => `${d.data.population}`)
+
           .attr('font-family', 'Helvetica')
           .style('text-anchor', 'middle')
           .style('alignment-baseline', 'middle')
@@ -153,14 +174,14 @@
           .style('alignment-baseline', 'middle')
             // set the fill color to black for country and world
           .style('fill', d => {
-            if (d.data.country === undefined) {
+            if (d.data.pclass === undefined) {
               return 'black'
             }
             return 'white'
           })
           // Offset the y by the radius for the country and world
           .attr('transform', d => {
-            if (d.data.country === undefined) {
+            if (d.data.pclass === undefined) {
               return `translate(0, -${d.r})`
             }
 
