@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heatmap</title>
+</head>
+<body>
+  <div id="container"></div>
+  <!-- <svg id="svg" width="800" height="500"></svg> -->
+  
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script>
+    /* Your code here! */
+    async function handleData() {
+      // -------- LOAD DATA ------------
+      const data = await d3.csv("./timelog.csv")
+      // console.log(data)
+      // set dimensions and margins of the graph
+      const margin = {top: 30, right: 30, bottom: 30, left: 30}, 
+          width = 450 - margin.left - margin.right,
+          height = 450 - margin.top - margin.bottom
+      
+      const gridSize = 30
+      
+      // append svg object to body
+      const svg = d3.select('#container')
+        .append("svg")
+          .attr("width", width + margin.left + margin.right)
+          .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+        .attr('transform', "translate(" + margin.left + "," + margin.top + ")")
+
+      const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+
+      // -------- HELPER FUNCTIONS ------------
+      // data.forEach(d => {
+      //   d.week = parseInt(d["Week #"].split(" ")[1])
+      //   // const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+      //   d.dates = days.map((day) => new Date(d[day]))
+      // })
+      
+      // Dates are formatted: 16.01.2023
+      const parseTime = d3.timeParse('%d.%m.%Y')
+      // parse the dates for d3
+      data.forEach(d => d.Date = parseTime(d.Date)) // loops over all of the objects in data and
+                                                    // replaces the existing date string with a date object
+
+      // -------- SCALES ------------
+
+      // find the extents of the dates
+      const dateExtent = d3.extent(data, d => d.Date)
+
+      const xScale = d3.scaleTime()
+        .domain(dateExtent)
+        // .range([0, days.length * gridSize])
+        // .range([0, data.length * gridSize])
+        .range([margin, width - margin])
+        .nice() 
+
+
+      // const xScale = d3.scaleBand()
+      //   .domain(data.map(d => d.Date))
+      //   .range([0, days.length * gridSize])
+
+      // find the extents of the hours
+      // const hoursExtent = d3.extent(data, d => d.Date)
+
+      const yScale = d3.scaleBand()
+        .domain(days)
+        .range([0, data.length * gridSize])
+
+      const colorScale = d3.scaleLinear()
+        .domain([0, 8])
+        .range(["lightgray", "steelblue"])
+
+      // -------- DRAW ------------
+      svg.selectAll("rect")
+        .data(data)
+        .enter()
+        .append("rect")
+        .attr("x", (d, i) => xScale(d.Date))
+        .attr('y', (d) => yScale(d.Day))
+        .attr('width', gridSize)
+        .attr('height', gridSize)
+        .attr("fill", d => colorScale(d.Javascript))
+
+    }
+
+    handleData()
+  </script>
+</body>
+</html>
