@@ -58,7 +58,6 @@
         // .range([0, data.length * gridSize])
         // .range([margin.left, width - margin.right])
         .range([margin.left, width - margin.right - gridSize * dateExtent.length])
-
         .nice()
 
       // create list of all fileds (columns), except for Date and Day
@@ -70,14 +69,30 @@
       const yScale = d3.scaleBand()
         .domain(fields)
         .range([0, fields.length * gridSize])
+        .padding(0.01)
         
       // find min and max values
       const minHours = d3.min(allValues)
       const maxHours = d3.max(allValues)
 
-      const colorScale = d3.scaleLinear()
-        .domain([0, maxHours])
-        .range(["lightgray", "steelblue"])
+      /* To have a different color for each field */ // help from ChatGPT
+      // Define colors for each field
+      const colors = ["steelblue", "red", "green", "orange", "purple", "yellow", "cyan", "magenta"];
+      const colorScales = {}
+      for (let i = 0; i < fields.length; i++) {
+        const field = fields[i]
+        const colorRange = ["white", colors[i % colors.length]]
+        colorScales[field] = d3
+          .scaleLinear()
+          .domain([0, maxHours])
+          .range(colorRange)
+          .unknown("white") // makes unknown values lightgray
+      }
+
+      /* To have the same color for all fields */
+      // const colorScale = d3.scaleLinear()
+      //   .domain([0, maxHours])
+      //   .range(["white", "steelblue"])
 
       // -------- AXES --------------
       // axis generator
@@ -111,7 +126,9 @@
         .attr('y', (d) => yScale(d.field) + margin.top)
         .attr('width', gridSize)
         .attr('height', gridSize)
-        .attr("fill", d => colorScale(isNaN(d.value) ? 0 : d.value))
+        // .attr("fill", d => colorScale(isNaN(d.value) ? 0 : d.value)) // one color range
+        .attr("fill", d => colorScales[d.field](d.value))
+
         
 
     }
