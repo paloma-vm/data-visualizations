@@ -12,21 +12,13 @@
         display: flex;
         justify-content: center;
         align-items: center;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
       }
     
       #container {
         border: 1px solid;
       }
 
-      /* .tooltip {
-        position: absolute;
-        pointer-events: none;
-        background-color: #fff;
-        border: 1px solid #ccc;
-        padding: 8px;
-        font-size: 12px;
-        opacity: 0;
-      } */
     </style>
 </head>
 <body>
@@ -164,18 +156,17 @@
             .attr('x', (width / 2))
             .attr('y', height + 100)
             .attr('text-anchor', 'middle')
-            .style('font-family', 'Helvetica')
             .style('font-size', '12px')
+            .style('font-weight', '500')
             .text('Week of')
         // y label
         svg
             .append('text')
-            // .attr('x', 10)
-            // .attr('y', height / 2)
             .attr('transform', 'translate(-40, ' + (height / 2 + 40) + ')rotate(-90)')
             .attr('text-anchor', 'middle')
-            .style('font-family', 'Helvetica')
+            // .style('font-family', 'Helvetica') // added font family to body
             .style('font-size', '12px')
+            .style('font-weight', '500')
             .text('Task')
 
         // graph title
@@ -184,8 +175,7 @@
             .attr('x', (width / 2))
             .attr('y', 10)
             .attr('text-anchor', 'middle')
-            .style('font-family', 'Helvetica')
-            .style('font-size', '12px')
+            .style('font-size', '16px')
             .text('Hours Spent on Task')
       
       // -------- TOOLTIP ------------------
@@ -199,6 +189,8 @@
         .style('border-width', '2px')
         .style('border-radius', '5px')
         .style('padding', '5px')
+        .style('position', 'absolute') // added to make the tooltip move
+        .style('font-size', '12px')
 
       // -------- DRAW ------------
       svg.selectAll("rect")
@@ -212,20 +204,25 @@
         .attr('height', gridSize)
         .attr("fill", d => colorScales[d.field](d.value))
         .on('mouseover', (event, d) => handleMouseOver(event, d))
+        .on('mousemove', (event, d) => handleMouseMove(event, d))
         .on('mouseout', (event, d) => handleMouseOut(event, d))
 
         function handleMouseOver(event, d) {
-          const [x,y] = d3.pointer(event, svg.node())
+          tooltip.transition()
+            .duration(200)
+            .style('opacity', 0.9)
+        }
+
+        function handleMouseMove (event, d) {
+          const formattedValue = d.value.toFixed(2)
        
           tooltip.transition()
             .duration(200)
             .style('opacity', 0.9)
-          tooltip.html(`Hours: ${d.value}`)
-            .style('left', (x + margin.left) + 'px')
-            .style('top', (y + margin.top - 28) + 'px')
-            // .style("left", (d3.mouse(this)[0]+70) + "px")
-            // .style("top", (d3.mouse(this)[1]) + "px")
-          console.log(d.value)
+          tooltip.html(`Hours: ${formattedValue}`) // formatted to 2 decimal places
+            .style('left', (event.x) + 220 + 'px') // help from https://stackoverflow.com/questions/72165273/d3-tooltip-placed-on-bottom-of-page-instead-of-next-to-data
+            // plus trial and error
+            .style('top', (event.y) + 100 + 'px')
         }
 
         function handleMouseOut(event, d) {
